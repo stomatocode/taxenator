@@ -59,7 +59,8 @@
 # Total: 29.83 
  
 # Output 2: 
-# 1 imported box of chocolates: 10.50 1 imported bottle of perfume: 54.65 
+# 1 imported box of chocolates: 10.50 
+# 1 imported bottle of perfume: 54.65 
 # Sales Taxes: 7.65 
 # Total: 65.15 
  
@@ -71,41 +72,32 @@
 # Sales Taxes: 6.70 
 # Total: 74.68 
 
-describe Printer do
+# describe Printer do
   
-end
+# end
 
-describe Scanner do
+# describe Scanner do
 
-  let(:items) {Scanner.}
+#   let(:items) {Scanner}
 
-  describe "#load_items" do
-    it "should read in items from a CSV (mock 'scanner')" do
-      expect
-    end
-  end
+#   describe "#load_items_csv" do
+#     it "should read in items from a CSV (mock 'scanner')" do
+#       expect
+#     end
+#   end
 
-end
+# end
 
 describe Basket do
 
-  context "good data" do
-
-  end
+  let(:calculator) {Calculator.new}
 
   describe "#compute" do
+
+    it "should create an instance of a Calculator" do
+      expect(calculator).to be_a Calculator
+    end
 
   end
 
 end
-
-
-
-
-
-
-
-
-
-
-
