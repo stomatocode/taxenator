@@ -3,9 +3,14 @@ require "pry"
 
 module Ring_up
   # adapt to accept ARGV for filename
-  def self.run(args = [])
-    if condition
-      
+  def self.run(scans = [])
+    if ARGV
+      baskets = []
+      scans = ARGV
+      scans.each do |file|
+        baskets << Basket.new(file)
+      end
+
     end
     basket = Basket.new(filename)
     
@@ -28,6 +33,12 @@ module Scanner
   end
 end
 
+module Printer
+  def print()
+    
+  end
+end
+
 class Basket 
   include Scanner
 
@@ -38,8 +49,9 @@ class Basket
   end
 
   def compute
+    totals = 0
+    @items.each_value {|item| totals += item[:price]}
     tax_applied = Tax_calculator.new.calculate(@items)
-    totals = @items.each_value
 
   end
 
@@ -53,7 +65,7 @@ class Tax_calculator
     @tax_exempt = rates[:tax_exempt] || [:food,:book,:medical]
   end
 
-  def self.calculate(basket)
+  def calculate(basket)
     basket.each_value do |item|
       if item[:origin] == :for
         item[:price] += (item[:price] * @import_duty)
