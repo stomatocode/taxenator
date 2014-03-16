@@ -1,22 +1,31 @@
 require "csv"
 require "pry"
 
-
-module Scanner
-  def load_items_csv(filename)
-    items = []
-    CSV.foreach(filename, :headers => true, :header_converters => :symbol) do |row|
-      items << row.to_hash
+module Ring_up
+  # adapt to accept ARGV for filename
+  def self.run(args = [])
+    if condition
+      
     end
-    items
-  end
-end
-
-module Printer
-  def terminal_output(items_hash)
+    basket = Basket.new(filename)
     
   end
 
+end
+
+
+module Scanner
+  def load_items_csv(filename)
+    items = {}
+    CSV.foreach(filename, :converters => :numeric, :headers => true, :header_converters => :symbol) do |row|
+      items[row[:name].split(/ /).first.downcase.to_sym] = row.to_hash
+    end
+    items.each_value do |item|
+      item[:type] = item[:type].to_sym
+      item[:origin] = item[:origin].to_sym
+    end
+    items
+  end
 end
 
 class Basket 
@@ -29,30 +38,39 @@ class Basket
   end
 
   def compute
-    calculator = Calculator.new
-    totals = calculator.calculate(@items)
+    tax_applied = Tax_calculator.new.calculate(@items)
+    totals = @items.each_value
 
   end
 
 end
 
-class Calculator
+class Tax_calculator
 
   def initialize(rates = {})
     @tax_rate = rates[:tax_rate] || 0.1
     @import_duty = rates[:import_duty] || 0.05
-    @exempt = rates[:exempt] || ["food","book","medical"]
+    @tax_exempt = rates[:tax_exempt] || [:food,:book,:medical]
   end
 
-  def calculate(basket)
-
+  def self.calculate(basket)
+    basket.each_value do |item|
+      if item[:origin] == :for
+        item[:price] += (item[:price] * @import_duty)
+        if !@exempt.include?(item[:type])
+          item[:price] += (item[:price] * @tax_rate)
+        end
+      else
+        if !@exempt.include?(item[:type])
+          item[:price] += (item[:price] * @tax_rate)         
+        end
+        item[:price] 
+      end
+    end
   end
 
 end
 
-basket = Basket.new("items.csv")
+
 binding.pry
-
 basket.compute
-
-
