@@ -60,11 +60,12 @@ class Basket
 
   def compute
     pre_tax
+    p @pre_tax_total
     @taxenator = Tax_calculator.new
     @taxenator.calculate(@items)
     @items.each_value {|post_tax| @final += post_tax[:price]}
     @tax = @final - @pre_tax_total
-    p @tax
+    p "fart #{@tax.round(2)}"
   end
 
   def pre_tax
@@ -84,18 +85,30 @@ class Tax_calculator
   def calculate(items)
     items.each_value do |item|
       if item[:origin] == :for
-        item[:price] += (item[:price] * @import_duty)
         if !@tax_exempt.include?(item[:type])
-          item[:price] += (item[:price] * @tax_rate)
+          item[:price] = item[:price] + (item[:price] * @tax_rate) + (item[:price] * @import_duty)
+          item[:price] = item[:price].round(2)
+          p "foreign not exempt: #{item[:price]}"
         end
+        item[:price] = item[:price] + (item[:price] * @import_duty)
+        item[:price] = item[:price].round(2)
+        p "foreign exempt #{item[:price]}"
       else
         if !@tax_exempt.include?(item[:type])
-          item[:price] += (item[:price] * @tax_rate)         
+          item[:price] = item[:price] + (item[:price] * @tax_rate)
+          item[:price] = item[:price].round(2)
+          p "domestic not exempt: #{item[:price]}"
         end
-        item[:price] 
+
+        item[:price]
+        p "domestic exempt: #{item[:price]}"
       end
-      item[:price] = item[:price].round(2)
+    item[:price] = item[:price].round(2)
     end
+  end
+
+  def round=(num) 
+    num=num.round(2)
   end
 
   def imported
