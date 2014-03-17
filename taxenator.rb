@@ -3,17 +3,20 @@ require "pry"
 
 module Ring_up
   # adapt to accept ARGV for filename
-  def self.run(scans = [])
+  def self.run
+    baskets = []
     if ARGV
-      baskets = []
-      scans = ARGV
-      scans.each do |file|
+      ARGV.each do |file|
         baskets << Basket.new(file)
       end
-
     end
     basket = Basket.new(filename)
-    
+
+    # call tax calculator here?
+    taxenator = Tax_calculator.new
+    taxenator.calculate(@items)
+
+
   end
 
 end
@@ -37,22 +40,33 @@ module Printer
   def print()
     
   end
+
+# def purchase_price
+#   sprintf( "%.2f",attributes['purchase_price'])
+# end
+
 end
 
 class Basket 
   include Scanner
+  include Printer
 
   attr_reader :items
 
   def initialize(origin)
     @items = load_items_csv(origin)
+    @pre_tax_total = 0
+    @tax = 0
   end
 
   def compute
-    totals = 0
-    @items.each_value {|item| totals += item[:price]}
-    tax_applied = Tax_calculator.new.calculate(@items)
+    pre_tax_total
+    @items.each_value {|post_tax| final += post_tax[:price]}
+    tax = final - totals
+  end
 
+  def pre_tax_total
+    @items.each_value {|pre_tax| @pre_tax_total += pre_tax[:price]}    
   end
 
 end
@@ -60,29 +74,38 @@ end
 class Tax_calculator
 
   def initialize(rates = {})
-    @tax_rate = rates[:tax_rate] || 0.1
-    @import_duty = rates[:import_duty] || 0.05
-    @tax_exempt = rates[:tax_exempt] || [:food,:book,:medical]
+    @tax_rate    = rates[:tax_rate]     || 0.1
+    @import_duty = rates[:import_duty]  || 0.05
+    @tax_exempt  = rates[:tax_exempt]   || [:food,:book,:medical]
   end
 
-  def calculate(basket)
-    basket.each_value do |item|
+  def calculate(items)
+    items.each_value do |item|
       if item[:origin] == :for
         item[:price] += (item[:price] * @import_duty)
-        if !@exempt.include?(item[:type])
+        if !@tax_exempt.include?(item[:type])
           item[:price] += (item[:price] * @tax_rate)
         end
       else
-        if !@exempt.include?(item[:type])
+        if !@tax_exempt.include?(item[:type])
           item[:price] += (item[:price] * @tax_rate)         
         end
         item[:price] 
       end
+      item[:price] = item[:price].round(2)
     end
+  end
+
+  def imported
+    
+  end
+
+  def domestic
+    
   end
 
 end
 
-
+basket = Basket.new("input3.csv")
 binding.pry
 basket.compute
