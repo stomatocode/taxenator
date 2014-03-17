@@ -87,16 +87,19 @@
 #   end
 
 # end
+require_relative "../taxenator.rb"
 
 describe Basket do
 
-  let(:calculator) {Calculator.new}
+  let(:calculator) {Tax_calculator.new}
 
   describe "#compute" do
 
-    it "should create an instance of a Calculator" do
-      expect(calculator).to be_a Calculator
+    it "should create an instance of a Tax_calculator" do
+      expect(calculator).to be_a Tax_calculator
     end
+
+    it "should "
 
   end
 

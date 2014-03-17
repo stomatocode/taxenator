@@ -1,17 +1,18 @@
 require "csv"
-require "pry"
 
 module Ring_up
   def self.run
     if ARGV.empty?
       basket = Basket.new("items.csv")
       basket.compute
-      basket.print
+      basket.print_items(basket.items)
+      basket.print_totals
     else
       ARGV.each do |file|
         basket = Basket.new(file)      
         basket.compute
-        basket.print
+        basket.print_items(basket.items)
+        basket.print_totals
       end
     end
   end
@@ -33,13 +34,16 @@ end
 
 module Printer
   def print_totals
-    puts  "Pre-tax total: #{@pre_tax_total}"
-    puts  "Tax: #{@tax}"
-    puts  "Final: #{@final}"
+    puts  "Pre-tax total: $#{@pre_tax_total}"
+    puts  "Tax: $#{@tax}"
+    puts  "Final: $#{@final}"
   end
 
-  def print_items(item)
-    puts "#{item[:quantity]} #{}"
+  def print_items(items)
+    puts  "# Receipt #"
+    items.each_value do |item|
+      puts "#{item[:quantity]} #{item[:name]}, #{item[:type]}: $#{item[:price]}"
+    end
   end
 end
 
@@ -63,6 +67,7 @@ class Basket
     @items.each_value {|post_tax| @final += post_tax[:price]}
     @tax = @final - @pre_tax_total
     @tax = @tax.round(2)
+    @final = @final.round(2)
   end
 
   def pre_tax
@@ -94,22 +99,18 @@ class Tax_calculator
     if exempt?(item[:type])
       item[:price] = item[:price] + (item[:price] * @import_duty)
       item[:price] = item[:price].round(2)
-      p "foreign exempt #{item[:price]}"
     else
       item[:price] = item[:price] + (item[:price] * @tax_rate) + (item[:price] * @import_duty)
       item[:price] = item[:price].round(2)
-      p "foreign not exempt: #{item[:price]}"
     end   
   end
 
   def domestic(item)
     if exempt?(item[:type])
       item[:price]
-      p "foreign exempt #{item[:price]}"
     else
       item[:price] = item[:price] + (item[:price] * @tax_rate)
       item[:price] = item[:price].round(2)
-      p "foreign not exempt: #{item[:price]}"
     end 
   end
 
@@ -119,7 +120,4 @@ class Tax_calculator
 
 end
 
-# basket = Basket.new("input3.csv")
 Ring_up.run
-# binding.pry
-# basket.compute
