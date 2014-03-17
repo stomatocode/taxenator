@@ -9,13 +9,9 @@ module Ring_up
       ARGV.each do |file|
         baskets << Basket.new(file)
       end
+    else
+      basket = Basket.new(filename)
     end
-    basket = Basket.new(filename)
-
-    # call tax calculator here?
-    taxenator = Tax_calculator.new
-    taxenator.calculate(@items)
-
 
   end
 
@@ -37,8 +33,10 @@ module Scanner
 end
 
 module Printer
-  def print()
-    
+  def print
+    puts  "Pre-tax total: #{@pre_tax_total}"
+    puts  "Tax: #{@tax}"
+    puts  "Final: #{@final}"
   end
 
 # def purchase_price
@@ -51,21 +49,25 @@ class Basket
   include Scanner
   include Printer
 
-  attr_reader :items
+  attr_reader :items, :pre_tax_total, :tax
 
   def initialize(origin)
     @items = load_items_csv(origin)
     @pre_tax_total = 0
     @tax = 0
+    @final = 0
   end
 
   def compute
-    pre_tax_total
-    @items.each_value {|post_tax| final += post_tax[:price]}
-    tax = final - totals
+    pre_tax
+    @taxenator = Tax_calculator.new
+    @taxenator.calculate(@items)
+    @items.each_value {|post_tax| @final += post_tax[:price]}
+    @tax = @final - @pre_tax_total
+    p @tax
   end
 
-  def pre_tax_total
+  def pre_tax
     @items.each_value {|pre_tax| @pre_tax_total += pre_tax[:price]}    
   end
 
