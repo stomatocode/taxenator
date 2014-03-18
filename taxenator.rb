@@ -1,4 +1,5 @@
 require "csv"
+# require "pry"
 
 module Ring_up
   def self.run
@@ -64,10 +65,8 @@ class Basket
     pre_tax
     @taxenator = Tax_calculator.new
     @taxenator.calculate(@items)
-    @items.each_value {|post_tax| @final += post_tax[:price]}
-    @tax = @final - @pre_tax_total
-    @tax = @tax.round(2)
-    @final = @final.round(2)
+    final
+    tax
   end
 
   def pre_tax
@@ -75,14 +74,24 @@ class Basket
     @pre_tax_total = @pre_tax_total.round(2)
   end
 
+  def final
+    @items.each_value {|post_tax| @final += post_tax[:price]}
+    @final = @final.round(2)        
+  end
+
+  def tax
+    @tax = @final - @pre_tax_total
+    @tax = @tax.round(2)    
+  end
+
 end
 
 class Tax_calculator
 
-  def initialize(rates = {})
-    @tax_rate    = rates[:tax_rate]     || 0.1
-    @import_duty = rates[:import_duty]  || 0.05
-    @tax_exempt  = rates[:tax_exempt]   || [:food,:book,:medical]
+  def initialize
+    @tax_rate    = 0.1
+    @import_duty = 0.05
+    @tax_exempt  = [:food,:book,:medical]
   end
 
   def calculate(items)
